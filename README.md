@@ -475,3 +475,4 @@ savefile <- paste("ewas_results/",Trait,TP,Covariates,CellAdj,Sys.Date(),".Rdata
 save(ewas_res,file=savefile)
 ```
 
+IT IS OVER!!!! 
