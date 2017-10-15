@@ -10,17 +10,17 @@ Features of the EWAS performed through this pipeline:
 * methylation is the outcome, your trait of interest is the exposure
 * four models are actually run for each input file, these are:
 
-   1) none: no covariates
-   2) all: all covariates
-   3) sva: all covariates + surrogate variables generated using sva (surrogate variable analysis)
-   4) isva: all covariates + surrogate variables generated using isva (independent surrogate variable analysis)
+   1) *none:* no covariates
+   2) *all:* all covariates
+   3) *sva:* all covariates + surrogate variables generated using sva (surrogate variable analysis)
+   4) *isva:* all covariates + surrogate variables generated using isva (independent surrogate variable analysis)
    
-* you'll get the results for all 4 in your EWAS results
+* you'll get the results for all four in your EWAS results
 
 If you want to run a more advanced EWAS (e.g., methylation as the exposure, logistic regression, etc), this script isn't the one! I'm hoping to write a similar tutorial for more advanced EWAS when I get a chance. For now, you can email me and I'll share what code I have.
 
 # Set up
-In my home directory on Bluecrystal 3, I have a folder called `Common_files`. In this folder, I store two files that I think I'll need for multiple EWAS:
+In my home directory on Bluecrystal 3, I have a folder called `Common_files`. In this folder, I store three files that I think I'll need for multiple EWAS:
 
 * `naeem_list.csv` : a list of probes that have been identified as potentially problematic (on a SNP, cross-hybridising, etc) according to Naeem et al.
 
