@@ -1,35 +1,34 @@
 # My EWAS pipeline using meffil
 
-This is step-by-step description of how I would run an EWAS using ARIES (ALSPAC) data and the R package meffil. I'm not saying this is the BEST way to run an EWAS, but it's the best way I've found (and I've spent a fair bit of time thinking about what the best way might be).
+This is a step-by-step description of how I would run an EWAS using ARIES (ALSPAC) data and the R package meffil. I'm not saying this is the BEST way to run an EWAS, but it's the best way I've found (and I've spent a fair bit of time thinking about what the best way might be).
 If you find a better way, then please let me know!
 
 # What type of EWAS will this run?
 
 Features of the EWAS performed through this pipeline:
-* linear regression 
-* methylation is the outcome, your trait of interest is the exposure
-* four models are actually run for each input file, these are:
+* Linear regression 
+* Methylation is the outcome, your trait of interest is the exposure
+* Four models are run for each input file, these are:
 
    1) **none:** no covariates
    2) **all:** all covariates
    3) **sva:** all covariates + surrogate variables generated using sva (surrogate variable analysis)
    4) **isva:** all covariates + surrogate variables generated using isva (independent surrogate variable analysis)
    
-* you'll get the results for all four in your EWAS results
+* You'll get the results for all four in your EWAS results
 
 If you want to run a more advanced EWAS (e.g., methylation as the exposure, logistic regression, etc), this script isn't the one! I'm hoping to write a similar tutorial for more advanced EWAS when I get a chance. For now, you can email me and I'll share what code I have.
 
 # Set up
 In my home directory on Bluecrystal 3, I have a folder called `Common_files`. In this folder, I store three files that I think I'll need for multiple EWAS:
 
-* `naeem_list.csv` : a list of probes that have been identified as potentially problematic (on a SNP, cross-hybridising, etc) according to Naeem et al.
+* `naeem_list.csv` : a list of probes that have been identified as potentially problematic (on a SNP, cross-hybridising, etc) according to [Naeem et al](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3943510/).
 
 * `aries-detailed-cell-counts-20150409.rda` : a list of dataframes (one for each ARIES time point) with cell counts estimated using the Houseman methods but where Granulocytes are split into Eosinophils and Neutrophils.
 
 * `meffil_EWAS_script.r` : my EWAS R script (more on this below). This should be generic (i.e. you can use the same script to run any ARIES EWAS, providing you don't want to do anything too fancy).
 
-
-I've uploaded these three files to this github repository, but please note that `aries-detailed-cell-counts-20150409.rda`is password protected and only relevant when you want to adjust for 'detailed' cell counts (i.e. including eosinophils and neutrophils). You can email me for the password.
+I've uploaded the Naeem list and EWAS script files to this github repository, but you'll have to contact me for the detailed cell counts file since it contains individual level data on ALSPAC participants.
 
 I then have another folder called `EWAS` with subfolders for different projects. For example, I have projects called `pace_mat_bmi`, `pace_mat_alcohol`, `alspac_mat_depression` `cleft_subtypes`. Within each project folder I have further subfolders:
 
@@ -336,13 +335,13 @@ Now I've finally finished setting up my data for the EWAS :)
 It's time to actually run the EWAS using the meffil package.
 This is achieved using a single function called meffil.ewas. I feed it the following arguments:
 
-* methylation data matrix (meth)
-* my trait of interest [i.e. the second column of Pheno] (variable=Pheno[,2])
-* my covariates [i.e. everything in Pheno that isn't the ID or my trait of interest] (covariates=Pheno[,-(1:2)]) 
-* do I want to remove outliers by winsorizing? No (winsorize.pct = NA)
-* how many CpGs do we want to base the surrogate variable analysis on? All the CpGs, or if there are >20,000, the 20,000 most variable [most.variable = min(nrow(meth), 20000)] 
-* do I want to remove outliers using the Tukey Method? Yes, and my threshod is the IQR multiplied by 3 (outlier.iqr.factor=3)
-* do I want to know how meffil is getting on with my EWAS? Yes [verbose=TRUE]
+* Methylation data matrix (meth)
+* My trait of interest [i.e. the second column of Pheno] (variable=Pheno[,2])
+* My covariates [i.e. everything in Pheno that isn't the ID or my trait of interest] (covariates=Pheno[,-(1:2)]) 
+* Do I want to remove outliers by winsorizing? No (winsorize.pct = NA)
+* How many CpGs do we want to base the surrogate variable analysis on? All the CpGs, or if there are >20,000, the 20,000 most variable (most.variable = min(nrow(meth), 20000))
+* Do I want to remove outliers using the Tukey Method? Yes, and my threshold is the IQR multiplied by 3 (outlier.iqr.factor=3)
+* Do I want to know how meffil is getting on with my EWAS? Yes (verbose=TRUE)
 
 ```
 #Run EWAS using meffil
