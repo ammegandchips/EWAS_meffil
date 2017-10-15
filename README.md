@@ -12,10 +12,12 @@ Features of the EWAS performed through this pipeline:
 * linear regression 
 * methylation is the outcome, your trait of interest is the exposure
 * four models are actually run for each input file, these are:
-   1)
-   2)
-   3)
-   4)
+
+   1) none: no covariates
+   2) all: all covariates
+   3) sva: all covariates + surrogate variables generated using sva (surrogate variable analysis)
+   4) isva: all covariates + surrogate variables generated using isva (independent surrogate variable analysis)
+   
 * you'll get the results for all 4 in your EWAS results
 
 If you want to run a more advanced EWAS (e.g., methylation as the exposure, logistic regression, etc), this script isn't the one! I'm hoping to write a similar tutorial for more advanced EWAS when I get a chance. For now, you can email me and I'll share what code I have.
@@ -173,7 +175,7 @@ load("/panfs/panasas01/dedicated-mrcieu/studies/latest/alspac/epigenetic/methyla
 
 I don't want ALL the ARIES samples, I just want the samples for one time point (if I want to look at multiple time points, I either run multiple EWAS looking at each time point cross-sectionally, or I would have to write a more advanced script if I wanted to do something fancy like longitudinal modelling).
 
-This line just extracts the info on the samples specific to the time point of interes:
+This line just extracts the info on the samples specific to the time point of interest:
 `
 samplesheet<-subset(samplesheet, time_point==TP)
 `
@@ -222,7 +224,7 @@ annotation <- meffil.get.features("450k")
 
 Now I want to filter out certain probes from the methylation data.
 
-First I'll get rid of anything with a detection P-value over 0.05 for over 5% of samples, then remove anything on the X and Y chromosomes (if you don't want to do this, just delete these lines), then remove SNPs and control probes included on the array for quality control purposes. The final few lines here just let me know how many probes I have left and how many were removed for each reason:
+First I'll get rid of anything with a detection P-value over 0.05 for over 5% of samples (this threshold is up to you, 0.05 is commonly used, but there's some evidence that 1E-10 might be more appropriate), then remove anything on the X and Y chromosomes (if you don't want to do this, just delete these lines), then remove SNPs and control probes included on the array for quality control purposes. The final few lines here just let me know how many probes I have left and how many were removed for each reason:
 
 `
 #Filter meth data (remove sex chromosomes and SNPs and probes with high detection P-values)
@@ -262,45 +264,91 @@ cells<-read.table("/panfs/panasas01/dedicated-mrcieu/studies/latest/alspac/epige
 }}
 `
 
+In the DNA methylation data, each sample has a "sentrix ID", which describes where the sample appeared on the Illumina chip (row and column number). In our ALSPAC phenotype data, individuals have an 'aln' ID. So I have to add the sentrix ID (called 'Sample_Name') to my phenotype data so that I can then match my phenotype data to the methylation data.
 
-
+`
 #Add Sample_Name to Pheno (assuming Pheno contains aln)
 Pheno<-merge(Pheno,samplesheet[,c("ALN","Sample_Name")],by.x="aln",by.y="ALN")
+`
 
+Next, I want to get rid of any phenotype variables I don't need and get rid of any individuals with NAs (missing data). If I wanted to impute missing data (instead of doing a complete case analysis) I'd have to use a fancy imputation approach (talk to Harriet Mills and/or Kate Tilling).
+
+`
 #Prepare phenotype data
 Covs<-strsplit(Covariates,split=",")[[1]]
 Pheno<-na.omit(Pheno[,c("Sample_Name",Trait,Covs)])
+`
 
+Now I add estimated cell counts to my phenotype data:
+
+`
 #Merge Pheno with cell-counts
 colnames(cells)[1]<-"Sample_Name"
 Pheno<-merge(Pheno,cells,by.x="Sample_Name",by.y="Sample_Name")
+`
 
+And then match my methylation data to my phenotype data. This just means I get the individuals in my phenotype data in the same order as the individuals in the methylation data, so the samples match up. The last line prints a message to let me know whether the matching was successful.
+
+`
 #Match meth to Pheno
 meth<-meth[,na.omit(match(Pheno$Sample_Name,colnames(meth)))]
 Pheno<-Pheno[match(colnames(meth),Pheno$Sample_Name),]
-
 ifelse(all(Pheno$Sample_Name==colnames(meth)), "meth and phenotype data successfully matched :) ","Data not matched :(")
+`
 
+Next, I get rid of any "empty" factor levels. This just means that, if any of my phenotype variables were being treated by R as factor variables, I would be getting rid of any levels that didn't apply to anyone in my dataset. E.g. if everyone in my dataset had either 1 or 0 previous children, but the variable for number of previous children included levels 0, 1 and 2 I would be dropping 2 as an empty level. Don't worry too much if you don't understand this. It's just an easy step that can stop later functions from failing.
+
+`
 Pheno<-droplevels(Pheno) # get rid of any empty factor levels 
+`
 
+At this point, I like to give myself a little summary of the data to make sure I've roughly got the number of people I was expecting 
+
+`
 #Little summary of the phenotype data at this point
 paste("There are ",nrow(Pheno)," people in this analysis")
 "Here's a summary of the phenotype data:"
 summary(Pheno)
+`
 
+If I want to convert beta values to M-values (set using the BorM argument), then this bit will do that:
+
+`
 # Convert to M-values if necessary
 if(BorM=="M"){
 	meth <- log2(meth/(1-meth))
 }
+`
 
+If I don't want to include cell counts in the EWAS model (set using the CellAdj argument), this bit will get rid of cell counts from my phenotype data:
+
+`
 #Include cell counts in the EWAS model?
 if(CellAdj=="noCells"){
 Pheno<-Pheno[,-which(colnames(Pheno) %in% colnames(cells)[-1])]
 }
+`
 
+Now I've finally finished setting up my data for the EWAS :)
+It's time to actually run the EWAS using the meffil package.
+This is achieved using a single function called meffil.ewas. I feed it the following arguments:
+
+* methylation data matrix (meth)
+* my trait of interest [i.e. the second column of Pheno] (variable=Pheno[,2])
+* my covariates [i.e. everything in Pheno that isn't the ID or my trait of interest] (covariates=Pheno[,-(1:2)]) 
+* do I want to remove outliers by winsorizing? No (winsorize.pct = NA)
+* how many CpGs do we want to base the surrogate variable analysis on? All the CpGs, or if there are >20,000, the 20,000 most variable [most.variable = min(nrow(meth), 20000)] 
+* do I want to remove outliers using the Tukey Method? Yes, and my threshod is the IQR multiplied by 3 (outlier.iqr.factor=3)
+* do I want to know how meffil is getting on with my EWAS? Yes [verbose=TRUE]
+
+`
 #Run EWAS using meffil
-
 obj <- meffil.ewas(meth, variable=Pheno[,2], covariates=Pheno[,-(1:2)], winsorize.pct = NA  ,most.variable = min(nrow(meth), 20000), outlier.iqr.factor=3, verbose=TRUE)
+`
+
+This should take a while to run, because it's basically running four EWAS at once, each one involving 450,000 regression analyses on hundreds of people.
+
+`
 ewas_res<-data.frame(
 	probeID=rownames(obj$analyses$none$table),
 	coef.none=obj$analyses$none$table$coefficient,
@@ -316,6 +364,7 @@ ewas_res<-data.frame(
 	se.isva=obj$analyses$isva$table$coefficient.se,
 	p.isva=obj$analyses$isva$table$p.value
 	)
+`
 
 ewas.parameters<-meffil.ewas.parameters(sig.threshold=1e-5, max.plots=5, model="isva")
 ewas.summary <- meffil.ewas.summary(ewas.results, meth, parameters=ewas.parameters)   
