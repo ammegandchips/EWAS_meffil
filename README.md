@@ -1,7 +1,4 @@
-# This isn't finished yet! I'm hoping to finish it over the next couple of days. Come back then :)
-My EWAS pipeline using meffil
-
-Written by Gemma Sharp on the 19th of May 2017
+# My EWAS pipeline using meffil
 
 This is step-by-step description of how I would run an EWAS using ARIES (ALSPAC) data and the R package meffil. I'm not saying this is the BEST way to run an EWAS, but it's the best way I've found (and I've spent a fair bit of time thinking about what the best way might be).
 If you find a better way, then please let me know!
@@ -88,14 +85,14 @@ R CMD BATCH --no-save --no-restore '--args Trait CellData CellAdj Phenofile Meth
 
 `--args ` stays the same, but `Trait CellData CellAdj Phenofile Method Removal BorM TP PACE Covariates Crude_or_Adj WD` are the bits I change for each EWAS I run.
 
-* Trait: The trait of interest, exactly as it appears in the Phenofile (i.e. the exact variable name)
-* CellData: Which cell counts should we use? Options are houseman or houseman_eos for whole blood or one of the cord blood references (gse68456, gervinandlyle, andrews-and-bakulski)
-* CellAdj: Do we want to adjust for estimated cells? Options are Cells or noCells
-* Phenofile: Path to the file containing all the phenotype information, which must be a .dta file from stata version 12 (saveold in STATA). If this is a hassle (which it often is), you could just change the line where this file is read in the R script (e.g. instead of read.dta use read.csv and save Phenofile as a .csv file). 
-* BorM: Do we want to run our EWAS on beta values (scale of 0 to 1) or M-values (logit transformation of beta values)? You can read about the pros and cons of each in a paper by Du et al. However, I always go for beta values because the resulting coefficient is more intuitive. Options for this argument are B or M.
-* TP: What ARIES time-point are we interested in? Options are cord, F7, 15up, antenatal or FOM
-* Covariates: List of covariates we want to adjust for in this model. All these variables need to be in Phenofile. Separate the list here by commas, but don't include spaces or quotation marks (for example: mat_age,mat_ses,mat_smoke,parity).
-* WD: The directory for this EWAS project (i.e. the project folder)  
+* *Trait:* The trait of interest, exactly as it appears in the Phenofile (i.e. the exact variable name)
+* *CellData:* Which cell counts should we use? Options are houseman or houseman_eos for whole blood or one of the cord blood references (gse68456, gervinandlyle, andrews-and-bakulski)
+* *CellAdj:* Do we want to adjust for estimated cells? Options are Cells or noCells
+* *Phenofile:* Path to the file containing all the phenotype information, which must be a .dta file from stata version 12 (saveold in STATA). If this is a hassle (which it often is), you could just change the line where this file is read in the R script (e.g. instead of read.dta use read.csv and save Phenofile as a .csv file). 
+* *BorM:* Do we want to run our EWAS on beta values (scale of 0 to 1) or M-values (logit transformation of beta values)? You can read about the pros and cons of each in a paper by Du et al. However, I always go for beta values because the resulting coefficient is more intuitive. Options for this argument are B or M.
+* *TP:* What ARIES time-point are we interested in? Options are cord, F7, 15up, antenatal or FOM
+* *Covariates:* List of covariates we want to adjust for in this model. All these variables need to be in Phenofile. Separate the list here by commas, but don't include spaces or quotation marks (for example: mat_age,mat_ses,mat_smoke,parity).
+* *WD:* The directory for this EWAS project (i.e. the project folder)  
 
 The final bits of this line are just the file path to the R script and the file path to an `.out` file, which will show the output from R and is basically just there so you can check how your EWAS is doing and troubleshoot any problems if it doesn't finish (i.e. you can see how far it got through the script and any error messages R might spit out).
 
