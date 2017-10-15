@@ -120,7 +120,7 @@ qsub EWAS/project_name/submission_scripts/example.sh
 ```
 
 # The EWAS R script
-The actual EWAS all happens in R, but this is automated by the .sh script, so I shouldn't actually need to open R yourself (unless my EWAS doesn't run properly and I want to troubleshoot why that is).
+The actual EWAS all happens in R, but this is automated by the .sh script, so I shouldn't actually need to open R myself (unless my EWAS doesn't run properly and I want to troubleshoot why that is).
 
 The R script is called `meffil_EWAS_script.r` and is stored in the Common_files folder.
 
