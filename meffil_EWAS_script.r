@@ -15,7 +15,7 @@ Phenofile       <-      toString(args[4]) #Path to file containing all phenotype
 BorM    <-      toString(args[5]) #Betas or M-values (B or M)
 TP <-  toString(args[6]) #Time point (cord or F7 or 15up or antenatal or FOM)
 Covariates <-toString(args[7]) #list of covariates (eg: m_age,mum_uni,matsm,parity i.e. commas but no spaces or quotation marks)
-WD<- toString(args[8]) #Working directory (eg /panfs/panasas01/sscm/gs8094/EWAS/)
+WD<- toString(args[8]) #Working directory (eg /panfs/panasas01/sscm/gs8094/EWAS/example_project)
 
 print(Trait)
 print(CellData)
@@ -136,7 +136,7 @@ ewas_res<-data.frame(
 	)
 
 ewas.parameters<-meffil.ewas.parameters(sig.threshold=1e-5, max.plots=5, model="isva")
-ewas.summary <- meffil.ewas.summary(ewas.results, meth, parameters=ewas.parameters)   
+ewas.summary <- meffil.ewas.summary(obj, meth, parameters=ewas.parameters)   
 savefile <- paste("ewas_results/",Trait,TP,Covariates,CellAdj,Sys.Date(),".html", sep = "_")
 meffil.ewas.report(ewas.summary, output.file=savefile,author="gemma sharp", study="alspac")
 
