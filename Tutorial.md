@@ -374,7 +374,7 @@ This next section makes a HTML report summarizing the results of the EWAS. Here 
 
 ```
 ewas.parameters<-meffil.ewas.parameters(sig.threshold=1e-5, max.plots=5, model="isva")
-ewas.summary <- meffil.ewas.summary(ewas.results, meth, parameters=ewas.parameters)   
+ewas.summary <- meffil.ewas.summary(obj, meth, parameters=ewas.parameters)   
 savefile <- paste("ewas_results/",Trait,TP,Covariates,CellAdj,Sys.Date(),".html", sep = "_")
 meffil.ewas.report(ewas.summary, output.file=savefile,author="gemma sharp", study="alspac")
 ```
