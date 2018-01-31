@@ -79,10 +79,10 @@ The first bit of this line (`R CMD BATCH --no-save --no-restore`) is just saying
 The next bit is where we sent the 'arguments', which are basically just inputs to the EWAS R script:
 
 ```
-R CMD BATCH --no-save --no-restore '--args Trait CellData CellAdj Phenofile Method Removal BorM TP PACE Covariates Crude_or_Adj WD' /panfs/panasas01/sscm/gs8094/Common_files/meffil_EWAS_script.r /panfs/panasas01/sscm/gs8094/EWAS/example_project/example.out
+R CMD BATCH --no-save --no-restore '--args Trait CellData CellAdj Phenofile BorM TP Covariates WD' /panfs/panasas01/sscm/gs8094/Common_files/meffil_EWAS_script.r /panfs/panasas01/sscm/gs8094/EWAS/example_project/example.out
 ```
 
-`--args ` stays the same, but `Trait CellData CellAdj Phenofile Method Removal BorM TP PACE Covariates Crude_or_Adj WD` are the bits I change for each EWAS I run.
+`--args ` stays the same, but `Trait CellData CellAdj Phenofile BorM TP Covariates WD` are the bits I change for each EWAS I run.
 
 * **Trait:** The trait of interest, exactly as it appears in the Phenofile (i.e. the exact variable name)
 * **CellData:** Which cell counts should we use? Options are houseman or houseman_eos for whole blood or one of the cord blood references (gse68456, gervinandlyle, andrews-and-bakulski)
